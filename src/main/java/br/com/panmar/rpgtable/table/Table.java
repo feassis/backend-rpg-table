@@ -6,7 +6,8 @@ import java.util.Comparator;
 import br.com.panmar.rpgtable.tools.RandomStringGenerator;
 
 public class Table {
-	private ArrayList<Creature> onTableCreatures;
+	private ArrayList<Creature> onTableCreatures = new ArrayList<Creature>();
+	private ArrayList<Player> players = new ArrayList<Player>();
 	private Master master;
 	private String tableId;
 	
@@ -28,4 +29,25 @@ public class Table {
 		Collections.sort(onTableCreatures, Comparator.comparingInt(Creature::GetInitiative).reversed());
 	}
 	
+	public void AddPlayer(Player player) {
+		Player registeredPlayer = GetPlayerById(player.playerId);
+		
+		if(registeredPlayer != null) {
+			players.remove(registeredPlayer);
+		}
+		
+		players.add(player);
+		
+		System.out.println("Players: " + players.size());
+	}
+	
+	private Player GetPlayerById(String playerId) {
+		for(int i = 0; i < players.size(); i++) {
+			if(players.get(i).playerId == playerId) {
+				return players.get(i);
+			}
+		}
+		
+		return null;
+	}
 }
