@@ -14,7 +14,7 @@ public class TableService {
 	private ArrayList<Table> availableTables = new ArrayList<Table>();
 	
 	
-	public void CreateTable(Master master) {
+	public String CreateTable(Master master) {
 		
 		Table currentActiveTable = GetTableByMasterId(master.id);
 		
@@ -25,7 +25,8 @@ public class TableService {
 		Table newTable = new Table(master);
 		this.availableTables.add(newTable);
 		
-		System.out.println("Table Created for master: " + master.id);
+		System.out.println("Table Created for master: " + master.id + " table id: " + newTable.GetTableId());
+		return newTable.GetTableId();
 	}
 	
 	private Table GetTableByMasterId(String masterId) {

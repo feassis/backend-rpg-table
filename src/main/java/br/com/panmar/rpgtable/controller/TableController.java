@@ -20,7 +20,7 @@ public class TableController {
 	}
 	
 	@PostMapping("/createtable")
-	public void CreateTable(@RequestBody Master master) {
-		this.tableService.CreateTable(master);
+	public String CreateTable(@RequestBody Master master) {
+		return this.tableService.CreateTable(master);
 	}
 }
