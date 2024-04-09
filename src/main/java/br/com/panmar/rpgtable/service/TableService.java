@@ -15,7 +15,7 @@ public class TableService {
 	private ArrayList<Table> availableTables = new ArrayList<Table>();
 	
 	
-	public String CreateTable(Master master) {
+	public String CreateTable(Master master, String masterAddress) {
 		
 		Table currentActiveTable = GetTableByMasterId(master.id);
 		
@@ -23,14 +23,14 @@ public class TableService {
 			this.availableTables.remove(currentActiveTable);
 		}
 		
-		Table newTable = new Table(master);
+		Table newTable = new Table(master, masterAddress);
 		this.availableTables.add(newTable);
 		
 		System.out.println("Table Created for master: " + master.id + " table id: " + newTable.GetTableId());
 		return newTable.GetTableId();
 	}
 	
-	public String JoinTable(String tableId, Player player) {
+	public String JoinTable(String tableId, Player player, String address) {
 		Table table = GetTableById(tableId);
 		
 		System.out.println("Tables: " + availableTables.get(0).GetTableId().toString());
@@ -39,7 +39,7 @@ public class TableService {
 			return "Failed to join";
 		}
 		
-		table.AddPlayer(player);
+		table.AddPlayer(player, address);
 		return "joined successefuly";
 	}
 	

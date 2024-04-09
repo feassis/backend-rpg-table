@@ -12,6 +12,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
+import javax.servlet.http.HttpServletRequest;
+
 @RestController
 public class TableController {
 	
@@ -23,12 +25,12 @@ public class TableController {
 	}
 	
 	@PostMapping("/createtable")
-	public String CreateTable(@RequestBody Master master) {
-		return this.tableService.CreateTable(master);
+	public String CreateTable(@RequestBody Master master, HttpServletRequest request) {
+		return this.tableService.CreateTable(master, request.getRemoteAddr());
 	}
 	
 	@PutMapping("/player/jointable")
-	public String JoinTable(@RequestParam String id, @RequestBody Player player) {		
-		return this.tableService.JoinTable(id, player);
+	public String JoinTable(@RequestParam String id, @RequestBody Player player, HttpServletRequest request) {		
+		return this.tableService.JoinTable(id, player, request.getRemoteAddr());
 	}
 }

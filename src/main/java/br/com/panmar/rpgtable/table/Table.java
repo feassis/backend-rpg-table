@@ -7,8 +7,9 @@ import br.com.panmar.rpgtable.tools.RandomStringGenerator;
 
 public class Table {
 	private ArrayList<Creature> onTableCreatures = new ArrayList<Creature>();
-	private ArrayList<Player> players = new ArrayList<Player>();
+	private ArrayList<ActivePlayer> players = new ArrayList<ActivePlayer>();
 	private Master master;
+	private String masterAddress;
 	private String tableId;
 	
 	public String GetMasterId() {
@@ -19,7 +20,7 @@ public class Table {
 		return tableId;
 	}
 	
-	public Table(Master master) {
+	public Table(Master master, String masterAddress) {
 		this.master = master;
 		
 		this.tableId = RandomStringGenerator.GenerateRandomString(20);
@@ -29,21 +30,21 @@ public class Table {
 		Collections.sort(onTableCreatures, Comparator.comparingInt(Creature::GetInitiative).reversed());
 	}
 	
-	public void AddPlayer(Player player) {
-		Player registeredPlayer = GetPlayerById(player.playerId);
+	public void AddPlayer(Player player, String playerURL) {
+		ActivePlayer registeredPlayer = GetPlayerById(player.playerId);
 		
 		if(registeredPlayer != null) {
 			players.remove(registeredPlayer);
 		}
 		
-		players.add(player);
+		players.add(new ActivePlayer(player, playerURL));
 		
-		System.out.println("Players: " + players.size());
+		//System.out.println("Players: " + players.size());
 	}
 	
-	private Player GetPlayerById(String playerId) {
+	private ActivePlayer GetPlayerById(String playerId) {
 		for(int i = 0; i < players.size(); i++) {
-			if(players.get(i).playerId == playerId) {
+			if(players.get(i).Player.playerId == playerId) {
 				return players.get(i);
 			}
 		}
