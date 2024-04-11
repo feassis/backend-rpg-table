@@ -2,10 +2,8 @@ package br.com.panmar.rpgtable.table;
 
 public class ActivePlayer {
 	public Player Player;
-	public String Address;
 	
-	public ActivePlayer(Player player, String address) {
+	public ActivePlayer(Player player) {
 		Player = player;
-		Address = address;
 	}
 }
