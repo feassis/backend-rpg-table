@@ -2,9 +2,12 @@ package br.com.panmar.rpgtable.service;
 
 import org.springframework.stereotype.Service;
 
+import br.com.panmar.rpgtable.table.Action;
 import br.com.panmar.rpgtable.table.Master;
 import br.com.panmar.rpgtable.table.Player;
 import br.com.panmar.rpgtable.table.Table;
+import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
+import org.springframework.web.servlet.mvc.method.annotation.SseEmitter.SseEventBuilder;
 
 import java.util.ArrayList;
 
@@ -13,9 +16,10 @@ import java.util.ArrayList;
 public class TableService {
 
 	private ArrayList<Table> availableTables = new ArrayList<Table>();
+	private SseEmitter masterEventEmitter = new SseEmitter();
+	private SseEmitter playersEventEmitter = new SseEmitter();
 	
-	
-	public String CreateTable(Master master, String masterAddress) {
+	public String CreateTable(Master master) {
 		
 		Table currentActiveTable = GetTableByMasterId(master.id);
 		
@@ -23,24 +27,39 @@ public class TableService {
 			this.availableTables.remove(currentActiveTable);
 		}
 		
-		Table newTable = new Table(master, masterAddress);
+		Table newTable = new Table(master);
 		this.availableTables.add(newTable);
 		
 		System.out.println("Table Created for master: " + master.id + " table id: " + newTable.GetTableId());
-		return newTable.GetTableId();
+		return  newTable.GetTableId();
 	}
 	
-	public String JoinTable(String tableId, Player player, String address) {
+	public SseEmitter JoinTable(String tableId, Player player) {
 		Table table = GetTableById(tableId);
 		
 		System.out.println("Tables: " + availableTables.get(0).GetTableId().toString());
 		
 		if(table == null) {
-			return "Failed to join";
+			return null;
 		}
 		
-		table.AddPlayer(player, address);
-		return "joined successefuly";
+		try {
+			SseEventBuilder event =  SseEmitter.event().data("Added player: " + player.playerId).id("Master Report").name("Master Reporter");
+			masterEventEmitter.send(event);
+		} catch (Exception ex) {
+			masterEventEmitter.completeWithError(ex);
+		}
+		
+		
+		
+		table.AddPlayer(player);
+		return playersEventEmitter;
+	}
+	
+	public void RequestAction(String tableId, Action action) {
+		Table table = GetTableById(tableId);
+		
+		table.RequestAction(action);
 	}
 	
 	private Table GetTableByMasterId(String masterId) {
