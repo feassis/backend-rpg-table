@@ -27,6 +27,10 @@ public class Table {
 		this.tableId = RandomStringGenerator.GenerateRandomString(20);
 	}
 	
+	public void SetMaster(Master master) {
+		this.master = master;
+	}
+	
 	private void SortCreaturesOnTable() {
 		Collections.sort(onTableCreatures, Comparator.comparingInt(Creature::GetInitiative).reversed());
 	}

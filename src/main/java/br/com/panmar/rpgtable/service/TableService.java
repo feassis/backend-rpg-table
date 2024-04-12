@@ -20,13 +20,6 @@ public class TableService {
 	private SseEmitter playersEventEmitter = new SseEmitter();
 	
 	public String CreateTable(Master master) {
-		
-		Table currentActiveTable = GetTableByMasterId(master.id);
-		
-		if(currentActiveTable != null) {
-			this.availableTables.remove(currentActiveTable);
-		}
-		
 		Table newTable = new Table(master);
 		this.availableTables.add(newTable);
 		
@@ -34,13 +27,49 @@ public class TableService {
 		return  newTable.GetTableId();
 	}
 	
-	public SseEmitter JoinTable(String tableId, Player player) {
+	public SseEmitter GetMasterEventEmitter() {
+		return masterEventEmitter;
+	}
+	
+	public SseEmitter GetPlayerEventEmitter() {
+		return playersEventEmitter;
+	}
+	
+	public  String[] GetTablesByMasterId(String masterId) {
+		ArrayList<Table> tables = new ArrayList<Table>();
+		
+		for(int i = 0; i < this.availableTables.size(); i++) {
+			if(this.availableTables.get(i).GetMasterId().equals(masterId)) {
+				tables.add(this.availableTables.get(i));
+			}
+		}
+		
+		String[] tableArray = new String[tables.size()];
+		
+		for(int i = 0; i < tables.size(); i++) {
+			tableArray[i]=tables.get(i).GetTableId();
+		}
+		
+		return tableArray;
+	}
+	
+	public void JoinTableAsMaster(String tableId, Master master) {
+		Table table = GetTableById(tableId);
+		
+		if(table.GetMasterId() != master.id) {
+			return;
+		}
+		
+		table.SetMaster(master);
+	}
+	
+	public void JoinTableAsPlayer(String tableId, Player player) {
 		Table table = GetTableById(tableId);
 		
 		System.out.println("Tables: " + availableTables.get(0).GetTableId().toString());
 		
 		if(table == null) {
-			return null;
+			return;
 		}
 		
 		try {
@@ -50,10 +79,7 @@ public class TableService {
 			masterEventEmitter.completeWithError(ex);
 		}
 		
-		
-		
 		table.AddPlayer(player);
-		return playersEventEmitter;
 	}
 	
 	public void RequestAction(String tableId, Action action) {

@@ -6,6 +6,8 @@ import br.com.panmar.rpgtable.service.TableService;
 import br.com.panmar.rpgtable.table.Action;
 import br.com.panmar.rpgtable.table.Master;
 import br.com.panmar.rpgtable.table.Player;
+import br.com.panmar.rpgtable.table.Table;
+import java.util.ArrayList;
 
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,6 +15,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.CrossOrigin;
 
 @RestController
 public class TableController {
@@ -23,19 +27,49 @@ public class TableController {
 	public TableController(TableService tableService) {
 		this.tableService = tableService;
 	}
+
+	@GetMapping("/tables/master")
+	@CrossOrigin("*")
+	public String[] GetTables(@RequestParam String masterId){
+		
+		String[] tables = this.tableService.GetTablesByMasterId(masterId);
+		System.out.println(tables);
+		return tables;
+	}
+	
+	@GetMapping("/events/master")
+	@CrossOrigin("*")
+	public SseEmitter GetMasterEvent() {
+		return this.tableService.GetMasterEventEmitter();
+	}
+	
+	@GetMapping("/events/players")
+	@CrossOrigin("*")
+	public SseEmitter GetPlayersEvents() {
+		return this.tableService.GetPlayerEventEmitter();
+	}
 	
 	@PostMapping("/createtable")
+	@CrossOrigin("*")
 	public String CreateTable(@RequestBody Master master) {
 		System.out.println("Creating table for master: " + master.id);
 		return this.tableService.CreateTable(master);
 	}
 	
 	@PutMapping("/player/jointable")
-	public SseEmitter JoinTable(@RequestParam String id, @RequestBody Player player) {		
-		return this.tableService.JoinTable(id, player);
+	@CrossOrigin("*")
+	public void JoinTableAsPlayer(@RequestParam String id, @RequestBody Player player) {		
+		this.tableService.JoinTableAsPlayer(id, player);
+	}
+	
+	@PutMapping("/master/jointable")
+	@CrossOrigin("*")
+	public void JoinTableAsMaster(@RequestParam String id, @RequestBody Master master) {		
+		this.tableService.JoinTableAsMaster(id, master);
 	}
 	
 	@PostMapping("/RequestAction")
+	@CrossOrigin("*")
 	public void RequestAction(@RequestParam String id, @RequestBody Action action) {
 		this.tableService.RequestAction(id, action);
 	}
