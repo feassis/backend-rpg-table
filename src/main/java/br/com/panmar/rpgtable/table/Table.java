@@ -3,13 +3,19 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 
+import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
+
 import br.com.panmar.rpgtable.tools.RandomStringGenerator;
+import java.io.IOException;
 
 public class Table {
 	private ArrayList<Creature> onTableCreatures = new ArrayList<Creature>();
 	private ArrayList<ActivePlayer> players = new ArrayList<ActivePlayer>();
 	private Master master;
 	private String tableId;
+	public SseEmitter masterEventEmitter = new SseEmitter(Long.MAX_VALUE);
+	public SseEmitter playersEventEmitter = new SseEmitter(Long.MAX_VALUE);
+	
 	
 	private ArrayList<Action> actions = new ArrayList<Action>();
 	
@@ -29,6 +35,34 @@ public class Table {
 	
 	public void SetMaster(Master master) {
 		this.master = master;
+	}
+	
+	public void InitializeTable() {
+		masterEventEmitter = new SseEmitter(Long.MAX_VALUE);
+		
+		try {
+			masterEventEmitter.send(SseEmitter.event().name("INIT"));
+		}
+		catch(IOException e){
+			e.printStackTrace();
+		}
+		
+		playersEventEmitter = new SseEmitter(Long.MAX_VALUE);
+		
+		try {
+			playersEventEmitter.send(SseEmitter.event().name("INIT"));
+		}
+		catch(IOException e){
+			e.printStackTrace();
+		}
+	}
+	
+	public SseEmitter SubscribeToMasterEvent() {
+		return masterEventEmitter;
+	}
+	
+	public SseEmitter SubscribeToPlayerEvent() {
+		return playersEventEmitter;
 	}
 	
 	private void SortCreaturesOnTable() {

@@ -17,6 +17,9 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.http.MediaType;
 
 @RestController
 public class TableController {
@@ -37,16 +40,17 @@ public class TableController {
 		return tables;
 	}
 	
-	@GetMapping("/events/master")
+	@RequestMapping(value = "/events/master", method = RequestMethod.GET, consumes = MediaType.ALL_VALUE)
 	@CrossOrigin("*")
-	public SseEmitter GetMasterEvent() {
-		return this.tableService.GetMasterEventEmitter();
+	public SseEmitter GetMasterEvent(@RequestParam String id) {
+		System.out.println("Master requested event for table: " + id);
+		return this.tableService.GetMasterEventEmitter(id);
 	}
 	
-	@GetMapping("/events/players")
+	@RequestMapping(value = "/events/players", method = RequestMethod.GET, consumes = MediaType.ALL_VALUE)
 	@CrossOrigin("*")
-	public SseEmitter GetPlayersEvents() {
-		return this.tableService.GetPlayerEventEmitter();
+	public SseEmitter GetPlayersEvents(@RequestParam String id) {
+		return this.tableService.GetPlayerEventEmitter(id);
 	}
 	
 	@PostMapping("/createtable")

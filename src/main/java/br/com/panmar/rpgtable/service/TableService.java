@@ -16,23 +16,26 @@ import java.util.ArrayList;
 public class TableService {
 
 	private ArrayList<Table> availableTables = new ArrayList<Table>();
-	private SseEmitter masterEventEmitter = new SseEmitter();
-	private SseEmitter playersEventEmitter = new SseEmitter();
+	
 	
 	public String CreateTable(Master master) {
 		Table newTable = new Table(master);
 		this.availableTables.add(newTable);
+
+		newTable.InitializeTable();
 		
 		System.out.println("Table Created for master: " + master.id + " table id: " + newTable.GetTableId());
 		return  newTable.GetTableId();
 	}
 	
-	public SseEmitter GetMasterEventEmitter() {
-		return masterEventEmitter;
+	public SseEmitter GetMasterEventEmitter(String tableId) {
+		
+		
+		return  GetTableById(tableId).masterEventEmitter;
 	}
 	
-	public SseEmitter GetPlayerEventEmitter() {
-		return playersEventEmitter;
+	public SseEmitter GetPlayerEventEmitter(String tableId) {
+		return GetTableById(tableId).playersEventEmitter;
 	}
 	
 	public  String[] GetTablesByMasterId(String masterId) {
@@ -60,13 +63,15 @@ public class TableService {
 			return;
 		}
 		
+		
+		
 		table.SetMaster(master);
 	}
 	
 	public void JoinTableAsPlayer(String tableId, Player player) {
 		Table table = GetTableById(tableId);
 		
-		System.out.println("Tables: " + availableTables.get(0).GetTableId().toString());
+		
 		
 		if(table == null) {
 			return;
@@ -74,9 +79,10 @@ public class TableService {
 		
 		try {
 			SseEventBuilder event =  SseEmitter.event().data("Added player: " + player.playerId).id("Master Report").name("Master Reporter");
-			masterEventEmitter.send(event);
+			table.masterEventEmitter.send(event);
+			System.out.println("Table: " + tableId + " sent a event");
 		} catch (Exception ex) {
-			masterEventEmitter.completeWithError(ex);
+			table.masterEventEmitter.completeWithError(ex);
 		}
 		
 		table.AddPlayer(player);
