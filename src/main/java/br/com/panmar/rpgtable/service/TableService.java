@@ -27,16 +27,7 @@ public class TableService {
 		System.out.println("Table Created for master: " + master.id + " table id: " + newTable.GetTableId());
 		return  newTable.GetTableId();
 	}
-	
-	public SseEmitter GetMasterEventEmitter(String tableId) {
-		
-		
-		return  GetTableById(tableId).masterEventEmitter;
-	}
-	
-	public SseEmitter GetPlayerEventEmitter(String tableId) {
-		return GetTableById(tableId).playersEventEmitter;
-	}
+
 	
 	public  String[] GetTablesByMasterId(String masterId) {
 		ArrayList<Table> tables = new ArrayList<Table>();
@@ -63,35 +54,54 @@ public class TableService {
 			return;
 		}
 		
-		
-		
 		table.SetMaster(master);
 	}
 	
 	public void JoinTableAsPlayer(String tableId, Player player) {
 		Table table = GetTableById(tableId);
 		
-		
-		
 		if(table == null) {
 			return;
 		}
-		
-		try {
-			SseEventBuilder event =  SseEmitter.event().data("Added player: " + player.playerId).id("Master Report").name("Master Reporter");
-			table.masterEventEmitter.send(event);
-			System.out.println("Table: " + tableId + " sent a event");
-		} catch (Exception ex) {
-			table.masterEventEmitter.completeWithError(ex);
-		}
-		
+
 		table.AddPlayer(player);
+	}
+
+	public SseEmitter SubscribeToMaster(String tableId){
+		Table table = GetTableById(tableId);
+		
+		if(table == null) {
+			return null;
+		}
+
+		return table.SubscribeToMasterEvent();
+	}
+
+	public SseEmitter SubscribeToPlayer(String tableId){
+		Table table = GetTableById(tableId);
+		
+		if(table == null) {
+			return null;
+		}
+
+		return table.SubscribeToPlayerEvent();
 	}
 	
 	public void RequestAction(String tableId, Action action) {
 		Table table = GetTableById(tableId);
 		
 		table.RequestAction(action);
+	}
+
+	public void TestNotification(String tableId){
+		Table table = GetTableById(tableId);
+
+		if(table == null){
+			return;
+		}
+
+		table.SendEventToMaster();
+		table.SendEventToPlayers();
 	}
 	
 	private Table GetTableByMasterId(String masterId) {

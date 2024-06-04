@@ -1,25 +1,19 @@
 package br.com.panmar.rpgtable.controller;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 import br.com.panmar.rpgtable.service.TableService;
 import br.com.panmar.rpgtable.table.Action;
 import br.com.panmar.rpgtable.table.Master;
 import br.com.panmar.rpgtable.table.Player;
-import br.com.panmar.rpgtable.table.Table;
-import java.util.ArrayList;
-
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.CrossOrigin;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.http.MediaType;
 
 @RestController
 public class TableController {
@@ -40,19 +34,18 @@ public class TableController {
 		return tables;
 	}
 	
-	@RequestMapping(value = "/events/master", method = RequestMethod.GET, consumes = MediaType.ALL_VALUE)
+	@GetMapping("/events/master")
 	@CrossOrigin("*")
-	public SseEmitter GetMasterEvent(@RequestParam String id) {
-		System.out.println("Master requested event for table: " + id);
-		return this.tableService.GetMasterEventEmitter(id);
+	public SseEmitter SubscribeToMasterEvents(@RequestParam String id){
+		return this.tableService.SubscribeToMaster(id);
 	}
 	
-	@RequestMapping(value = "/events/players", method = RequestMethod.GET, consumes = MediaType.ALL_VALUE)
+	@GetMapping("/events/players")
 	@CrossOrigin("*")
-	public SseEmitter GetPlayersEvents(@RequestParam String id) {
-		return this.tableService.GetPlayerEventEmitter(id);
+	public SseEmitter SubscribeToPlayerEvents(@RequestParam String id){
+		return this.tableService.SubscribeToPlayer(id);
 	}
-	
+
 	@PostMapping("/createtable")
 	@CrossOrigin("*")
 	public String CreateTable(@RequestBody Master master) {
@@ -70,6 +63,14 @@ public class TableController {
 	@CrossOrigin("*")
 	public void JoinTableAsMaster(@RequestParam String id, @RequestBody Master master) {		
 		this.tableService.JoinTableAsMaster(id, master);
+	}
+
+	@GetMapping("/teste")
+	@CrossOrigin("*")
+	public String notifySubscribers(@RequestParam String id) {
+		System.out.println("notify");
+		this.tableService.TestNotification(id);
+		return "ok";
 	}
 	
 	@PostMapping("/RequestAction")

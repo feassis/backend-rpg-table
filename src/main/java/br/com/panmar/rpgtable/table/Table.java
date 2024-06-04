@@ -2,8 +2,11 @@ package br.com.panmar.rpgtable.table;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
+import org.springframework.web.servlet.mvc.method.annotation.SseEmitter.SseEventBuilder;
 
 import br.com.panmar.rpgtable.tools.RandomStringGenerator;
 import java.io.IOException;
@@ -13,8 +16,8 @@ public class Table {
 	private ArrayList<ActivePlayer> players = new ArrayList<ActivePlayer>();
 	private Master master;
 	private String tableId;
-	public SseEmitter masterEventEmitter = new SseEmitter(Long.MAX_VALUE);
-	public SseEmitter playersEventEmitter = new SseEmitter(Long.MAX_VALUE);
+	public ArrayList<SseEmitter> masterEventEmitter = new ArrayList<SseEmitter>();
+	public ArrayList<SseEmitter> playersEventEmitter = new ArrayList<SseEmitter>();
 	
 	
 	private ArrayList<Action> actions = new ArrayList<Action>();
@@ -38,31 +41,21 @@ public class Table {
 	}
 	
 	public void InitializeTable() {
-		masterEventEmitter = new SseEmitter(Long.MAX_VALUE);
 		
-		try {
-			masterEventEmitter.send(SseEmitter.event().name("INIT"));
-		}
-		catch(IOException e){
-			e.printStackTrace();
-		}
-		
-		playersEventEmitter = new SseEmitter(Long.MAX_VALUE);
-		
-		try {
-			playersEventEmitter.send(SseEmitter.event().name("INIT"));
-		}
-		catch(IOException e){
-			e.printStackTrace();
-		}
 	}
 	
 	public SseEmitter SubscribeToMasterEvent() {
-		return masterEventEmitter;
+		SseEmitter emitter = new SseEmitter(Long.MAX_VALUE);
+		System.out.println("Emitter criado");
+		masterEventEmitter.add(emitter);
+		return emitter;
 	}
 	
 	public SseEmitter SubscribeToPlayerEvent() {
-		return playersEventEmitter;
+		SseEmitter emitter = new SseEmitter(Long.MAX_VALUE);
+		System.out.println("Emitter criado");
+		playersEventEmitter.add(emitter);
+		return emitter;
 	}
 	
 	private void SortCreaturesOnTable() {
@@ -77,8 +70,6 @@ public class Table {
 		}
 		
 		players.add(new ActivePlayer(player));
-		
-		//System.out.println("Players: " + players.size());
 	}
 	
 	public void RequestAction(Action requestedAction) {
@@ -88,7 +79,41 @@ public class Table {
 			System.out.println("Action: " + actions.get(i).Name + " - Owner: " + actions.get(i).Owner + " - Target: " + actions.get(i).Target);
 		}
 	}
+
+	public void SendEventToMaster(){
+		System.out.println("Master event");
+		for (SseEmitter emitter : masterEventEmitter) {
+			try {
+				Gson gson = new GsonBuilder().setPrettyPrinting().create();
+				String json = gson.toJson(new TableEventData("test", "Master Test"));
+				SseEventBuilder event = SseEmitter.event();
+				event.data(json);
+				emitter.send(event);
+				System.out.println("master Sent");
+			} catch (Exception ex) {
+			 System.out.println("Erro ao enviar master, error " + ex.getMessage());
+			}
+		 
+		}
+	}
 	
+	public void SendEventToPlayers(){
+		System.out.println("Player event");
+		for (SseEmitter emitter : playersEventEmitter) {
+			try {
+				Gson gson = new GsonBuilder().setPrettyPrinting().create();
+				String json = gson.toJson(new TableEventData("test", "Player Test"));
+				SseEventBuilder event = SseEmitter.event();
+				event.data(json);
+				emitter.send(event);
+				System.out.println("player Sent");
+			} catch (Exception ex) {
+			 System.out.println("Erro ao enviar Player, error " + ex.getMessage());
+			}
+		 
+		}
+	}
+
 	private ActivePlayer GetPlayerById(String playerId) {
 		for(int i = 0; i < players.size(); i++) {
 			if(players.get(i).Player.playerId == playerId) {
