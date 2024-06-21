@@ -91,6 +91,19 @@ public class TableService {
 		Table table = GetTableById(tableId);
 		
 		table.RequestAction(action);
+		System.out.println("Action Requested");
+	}
+
+	public void AproveAction(String tableId, String actionId){
+		Table table = GetTableById(tableId);
+		
+		table.AproveAction(actionId);
+	}
+
+	public void RejectAction(String tableId, String actionId){
+		Table table = GetTableById(tableId);
+		
+		table.RejectAction(actionId);
 	}
 
 	public void TestNotification(String tableId){

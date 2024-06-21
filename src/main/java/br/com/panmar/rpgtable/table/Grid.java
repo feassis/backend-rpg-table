@@ -21,9 +21,21 @@ public class Grid {
         return GridMovement.GetPossiblePositions(this, posX, posY, moveCost);
     }
 
-    public int MoveTo(int initPosX, int initPosY, int endPosX, int endPosY){
+    public int MoveToCost(int initPosX, int initPosY, int endPosX, int endPosY){
         int totalMoveCost = GridMovement.FindPathCost(this, initPosX, initPosY, endPosX, endPosY);
 
         return totalMoveCost;
+    }
+
+    public void SetPlayerAtPosition(Player player, int x, int y){
+        grid[x][y].unitOnCell = player;
+    }
+
+    public void CleanPosition(int x, int y){
+        grid[x][y].unitOnCell = null;
+    }
+
+    public boolean CanMoveTo(int x, int y){
+        return grid[x][y].unitOnCell == null;
     }
 }

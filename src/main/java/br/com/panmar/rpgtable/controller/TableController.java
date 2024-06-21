@@ -56,6 +56,7 @@ public class TableController {
 	@PutMapping("/player/jointable")
 	@CrossOrigin("*")
 	public void JoinTableAsPlayer(@RequestParam String id, @RequestBody Player player) {		
+		System.out.println(player.toString());
 		this.tableService.JoinTableAsPlayer(id, player);
 	}
 	
@@ -77,5 +78,17 @@ public class TableController {
 	@CrossOrigin("*")
 	public void RequestAction(@RequestParam String id, @RequestBody Action action) {
 		this.tableService.RequestAction(id, action);
+	}
+
+	@PostMapping("/AproveAction")
+	@CrossOrigin("*")
+	public void AproveAction(@RequestParam String tableId,  @RequestBody Action action) {
+		this.tableService.AproveAction(tableId, action.ActionId);
+	}
+
+	@PostMapping("/RejectAction")
+	@CrossOrigin("*")
+	public void RejectAction(@RequestParam String tableId,  @RequestBody Action action) {
+		this.tableService.RejectAction(tableId, action.ActionId);
 	}
 }

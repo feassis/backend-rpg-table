@@ -2,7 +2,7 @@ package br.com.panmar.rpgtable.table;
 import java.util.ArrayList;
 
 public class GridCell {
-    public Unit unitOnCell;
+    public Player unitOnCell;
 
     public ArrayList<Neighbours> GetNeighbours(){
         ArrayList<Neighbours> neighbours = new ArrayList<Neighbours>();
