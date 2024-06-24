@@ -6,10 +6,13 @@ import br.com.panmar.rpgtable.table.Action;
 import br.com.panmar.rpgtable.table.Master;
 import br.com.panmar.rpgtable.table.Player;
 import br.com.panmar.rpgtable.table.Table;
+
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter.SseEventBuilder;
 
 import java.util.ArrayList;
+
+import br.com.panmar.rpgtable.table.PlayerPosRequest;
 
 
 @Service
@@ -21,8 +24,6 @@ public class TableService {
 	public String CreateTable(Master master) {
 		Table newTable = new Table(master);
 		this.availableTables.add(newTable);
-
-		newTable.InitializeTable();
 		
 		System.out.println("Table Created for master: " + master.id + " table id: " + newTable.GetTableId());
 		return  newTable.GetTableId();
@@ -136,6 +137,17 @@ public class TableService {
 		}
 		
 		return null;
+	}
+
+	public void InitializeGrid(String tableId, int[] size){
+		Table table = GetTableById(tableId);
+
+		table.InitializeTable(size);
+	}
+
+	public void SetPlayerPos(String tableId, PlayerPosRequest playerPosRequest){
+		Table table = GetTableById(tableId);
+		table.SetPlayerPosition(playerPosRequest);
 	}
 
 }

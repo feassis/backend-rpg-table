@@ -43,8 +43,9 @@ public class Table {
 		this.master = master;
 	}
 	
-	public void InitializeTable() {
-		
+	public void InitializeTable(int[] size) {
+		grid.InitializeGrid(size[0], size[1]);
+		SendEventToAll();
 	}
 
 	private void SendEventToAll(){
@@ -60,8 +61,6 @@ public class Table {
 		}
 
 		ProcessAction(desiredAction);
-
-		RemoveAction(desiredAction);
 
 		SendEventToAll();
 	}
@@ -83,18 +82,15 @@ public class Table {
 	
 	private void ProcessAction(Action action){
 		System.err.println(action.toString());
-		Player owner = GetPlayerById(action.Owner);
-		Player target = GetPlayerById(action.Target);
+		Player owner = GetPlayerById(action.owner);
+		Player target = GetPlayerById(action.target);
 		
-		switch (action.Name.trim()) {
-			case "attack":
-				DamagePlayer(target, owner.attackPower);
-				break;
-			case "heal":
-				HealPlayer(target, 1);
+		switch (action.name.trim()) {
+			case "movement":
+				ProcessMovementAction(action);
 				break;
 			default:
-				System.out.println(action.Name);
+				System.out.println(action.name);
 				throw new AssertionError();
 		}
 	}
@@ -111,7 +107,7 @@ public class Table {
 	private Action GetActionById(String actionId){
 		for(int i = 0; i < actions.size(); i++)
 		{
-			if(actions.get(i).ActionId.equals(actionId)){
+			if(actions.get(i).actionId.equals(actionId)){
 				return actions.get(i);
 			}
 		}
@@ -149,11 +145,11 @@ public class Table {
 	
 	public void RequestAction(Action requestedAction) {
 		Action action = requestedAction;
-		action.ActionId = RandomStringGenerator.GenerateRandomString(10);
+		action.actionId = RandomStringGenerator.GenerateRandomString(10);
 		actions.add(action);
 		
 		for(int i  = 0; i < actions.size(); i++) {
-			System.out.println("Action: " + actions.get(i).Name + " - Owner: " + actions.get(i).Owner + " - Target: " + actions.get(i).Target);
+			System.out.println("Action: " + actions.get(i).name + " - Owner: " + actions.get(i).owner + " - Target: " + actions.get(i).target);
 		}
 
 		SendEventToMaster();
@@ -164,7 +160,7 @@ public class Table {
 		for (SseEmitter emitter : masterEventEmitter) {
 			try {
 				Gson gson = new GsonBuilder().setPrettyPrinting().create();
-				String json = gson.toJson(new TableEventData("Master Test", tableDescription, players, actions));
+				String json = gson.toJson(new TableEventData("Master Test", tableDescription, players, actions, grid.GetGridSummary()));
 				SseEventBuilder event = SseEmitter.event();
 				event.data(json);
 				emitter.send(event);
@@ -181,7 +177,7 @@ public class Table {
 		for (SseEmitter emitter : playersEventEmitter) {
 			try {
 				Gson gson = new GsonBuilder().setPrettyPrinting().create();
-				String json = gson.toJson(new TableEventData("Player Test", tableDescription, players, actions));
+				String json = gson.toJson(new TableEventData("Player Test", tableDescription, players, actions, grid.GetGridSummary()));
 				SseEventBuilder event = SseEmitter.event();
 				event.data(json);
 				emitter.send(event);
@@ -191,6 +187,53 @@ public class Table {
 			}
 		 
 		}
+	}
+
+	public void SetPlayerPosition(PlayerPosRequest playerPosRequest){
+		Player desiredPlayer = GetPlayerById(playerPosRequest.playerId);
+		int[] pos = grid.GetPlayerPos(desiredPlayer);
+
+		if(grid.cols < playerPosRequest.yPos || grid.rows < playerPosRequest.xPos){
+			return;
+		}
+
+		if (pos[0] == -1 && pos[1] == -1) {
+			grid.SetPlayerAtPosition(desiredPlayer, playerPosRequest.xPos, playerPosRequest.yPos);
+			
+		}
+		else{
+			grid.CleanPosition(pos[0], pos[1]);
+			grid.SetPlayerAtPosition(desiredPlayer, playerPosRequest.xPos, playerPosRequest.yPos);
+		}
+
+		SendEventToAll();
+	}
+
+	private void ProcessMovementAction(Action action){
+		int xPos = action.intParams[0];
+		int yPos = action.intParams[1];
+
+		if(!grid.CanMoveTo(xPos, yPos)){
+			return;
+		}
+
+		Player player = GetPlayerById(action.target);
+
+		int[] playerPos = grid.GetPlayerPos(player);
+
+		int moveToPos = grid.MoveToCost(playerPos[0], playerPos[1], xPos, yPos);
+
+		if(player.currentMovement < moveToPos){
+			return;
+		}
+
+		grid.CleanPosition(playerPos[0], playerPos[1]);
+
+		player.currentMovement -= moveToPos;
+
+		grid.SetPlayerAtPosition(player, xPos, yPos);
+
+		RemoveAction(action);
 	}
 
 	private Player GetPlayerById(String playerId) {

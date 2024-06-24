@@ -11,10 +11,11 @@ public class Action {
     public int actionDiceNum;
     public int actionDiceFaces;
     public String actionDiceStatus;
+    public int[] intParams;
 
     // Construtor
     public Action(String actionId, String name, String owner, String target, String causes, String dependsOn, int actionResult,
-    int actionDiceNum, int actionDiceFaces, String actionDiceStatus) {
+    int actionDiceNum, int actionDiceFaces, String actionDiceStatus, int[] intParams) {
         this.actionId = actionId;
         this.name = name;
         this.owner = owner;
@@ -25,6 +26,7 @@ public class Action {
         this.actionDiceNum = actionDiceNum;
         this.actionDiceFaces = actionDiceFaces;
         this.actionDiceStatus = actionDiceStatus;
+        this.intParams = intParams;
     }
 
     // toString method

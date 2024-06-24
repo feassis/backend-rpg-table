@@ -14,6 +14,7 @@ import br.com.panmar.rpgtable.service.TableService;
 import br.com.panmar.rpgtable.table.Action;
 import br.com.panmar.rpgtable.table.Master;
 import br.com.panmar.rpgtable.table.Player;
+import br.com.panmar.rpgtable.table.PlayerPosRequest;
 
 @RestController
 public class TableController {
@@ -83,12 +84,24 @@ public class TableController {
 	@PostMapping("/AproveAction")
 	@CrossOrigin("*")
 	public void AproveAction(@RequestParam String tableId,  @RequestBody Action action) {
-		this.tableService.AproveAction(tableId, action.ActionId);
+		this.tableService.AproveAction(tableId, action.actionId);
 	}
 
 	@PostMapping("/RejectAction")
 	@CrossOrigin("*")
 	public void RejectAction(@RequestParam String tableId,  @RequestBody Action action) {
-		this.tableService.RejectAction(tableId, action.ActionId);
+		this.tableService.RejectAction(tableId, action.actionId);
+	}
+
+	@PostMapping("/InitializeGrid")
+	@CrossOrigin("*")
+	public void InitializeGrid(@RequestParam String tableId, @RequestBody int[] size){
+		this.tableService.InitializeGrid(tableId, size);
+	}
+
+	@PostMapping("/SetPlayerPos")
+	@CrossOrigin("*")
+	public void SetPlayerPos(@RequestParam String tableId, @RequestBody PlayerPosRequest playerPosRequest){
+		this.tableService.SetPlayerPos(tableId, playerPosRequest);
 	}
 }
